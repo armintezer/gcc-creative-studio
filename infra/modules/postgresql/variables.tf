@@ -13,6 +13,7 @@
 # limitations under the License.
 
 variable "project_id" {}
+# variable "region" { default = "europe-west3" }
 variable "region" {}
 variable "db_name" { default = "creative_studio" }
 variable "db_user" { default = "studio_user" }
