@@ -19,8 +19,8 @@ variable "gcp_project_id" {
 
 variable "gcp_region" {
   type        = string
-  description = "The GCP region for the development environment. Defaults to us-central1."
-  default     = "us-central1"
+  description = "The GCP region for the development environment. Defaults to europe-west3."
+  default     = "europe-west3"
 }
 
 variable "environment" {
@@ -98,13 +98,13 @@ variable "fe_build_substitutions" {
 variable "frontend_secrets" {
   type        = list(string)
   description = "A list of secret names required by the frontend build."
-  default = []
+  default     = []
 }
 
 variable "backend_secrets" {
   type        = list(string)
   description = "A list of secret names required by the backend build."
-  default = []
+  default     = []
 }
 
 variable "backend_runtime_secrets" {
