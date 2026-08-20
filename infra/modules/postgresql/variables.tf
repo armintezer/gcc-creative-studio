@@ -18,3 +18,7 @@ variable "region" {}
 variable "db_name" { default = "creative_studio" }
 variable "db_user" { default = "studio_user" }
 variable "db_password" { sensitive = true }
+variable "network_id" {
+  type        = string
+  description = "Self link of the VPC network to peer Cloud SQL's private IP into."
+}

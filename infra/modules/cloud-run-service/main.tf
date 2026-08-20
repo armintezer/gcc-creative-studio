@@ -39,6 +39,16 @@ resource "google_cloud_run_v2_service" "this" {
 
   template {
     service_account = google_service_account.run_sa.email
+    dynamic "vpc_access" {
+      for_each = var.vpc_network_id != null ? [1] : []
+      content {
+        network_interfaces {
+          network    = var.vpc_network_id
+          subnetwork = var.vpc_subnetwork_id
+        }
+        egress = "PRIVATE_RANGES_ONLY"
+      }
+    }
     volumes {
       name = "cloudsql"
       cloud_sql_instance {

@@ -48,6 +48,21 @@ data "google_project" "project" {
   project_id = var.gcp_project_id
 }
 
+# --- Networking (for Cloud SQL private IP + Cloud Run VPC egress) ---
+resource "google_compute_network" "vpc" {
+  name                    = "cstudio-${var.environment}-vpc"
+  project                 = var.gcp_project_id
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "vpc_subnet" {
+  name          = "cstudio-${var.environment}-subnet"
+  project       = var.gcp_project_id
+  region        = var.gcp_region
+  network       = google_compute_network.vpc.id
+  ip_cidr_range = "10.10.0.0/24"
+}
+
 # --- Predictable URLs & Environment Variables ---
 locals {
   region_code  = join("", [for s in split("-", var.gcp_region) : substr(s, 0, 1)])
@@ -91,7 +106,8 @@ module "postgresql" {
   source      = "../postgresql"
   project_id  = var.gcp_project_id
   region      = var.gcp_region
-  
+  network_id  = google_compute_network.vpc.self_link
+
   # Pass the ACTUAL value to create the user
   db_password = data.google_secret_manager_secret_version.db_password.secret_data
 }
@@ -132,6 +148,10 @@ module "backend_service" {
   
   # Pass the Secret ID reference (NOT the value) for Cloud Run
   db_secret_id              = "creative-studio-db-password"
+
+  # networking - needed to reach Cloud SQL's private IP
+  vpc_network_id    = google_compute_network.vpc.self_link
+  vpc_subnetwork_id = google_compute_subnetwork.vpc_subnet.self_link
 }
 
 resource "google_firebase_project" "default" {

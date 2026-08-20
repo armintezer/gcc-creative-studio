@@ -129,3 +129,13 @@ variable "db_secret_id" {
 }
 variable "db_name" { type = string }
 variable "db_user" { type = string }
+
+# networking (optional - only needed by services that must reach a private-IP resource)
+variable "vpc_network_id" {
+  type    = string
+  default = null
+}
+variable "vpc_subnetwork_id" {
+  type    = string
+  default = null
+}

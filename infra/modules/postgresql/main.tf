@@ -16,15 +16,31 @@ resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
 
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          = "creative-studio-db-private-ip"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = var.network_id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = var.network_id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
 resource "google_sql_database_instance" "default" {
   name             = "creative-studio-db-${random_id.db_name_suffix.hex}"
   database_version = "POSTGRES_18" # Latest stable version
   region           = var.region
   project          = var.project_id
 
+  depends_on = [google_service_networking_connection.private_vpc_connection]
+
   settings {
     tier = "db-perf-optimized-N-2"
-    
+
     # Enable IAM Authentication for better security (optional but recommended)
     database_flags {
       name  = "cloudsql.iam_authentication"
@@ -32,10 +48,11 @@ resource "google_sql_database_instance" "default" {
     }
 
     ip_configuration {
-      ipv4_enabled = true # Easy connectivity from Cloud Run without VPC peering complexity
+      ipv4_enabled    = false # No external IP - org policy constraints/sql.restrictPublicIp blocks it
+      private_network = var.network_id
     }
   }
-  
+
   deletion_protection = false # Set to true for production
 }
 
