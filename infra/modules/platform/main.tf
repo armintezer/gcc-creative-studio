@@ -60,7 +60,7 @@ resource "google_compute_subnetwork" "vpc_subnet" {
   project       = var.gcp_project_id
   region        = var.gcp_region
   network       = google_compute_network.vpc.id
-  ip_cidr_range = "10.10.0.0/24"
+  ip_cidr_range = "10.10.0.0/20"
 }
 
 # --- Predictable URLs & Environment Variables ---
