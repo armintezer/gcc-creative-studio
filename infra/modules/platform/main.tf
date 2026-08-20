@@ -150,8 +150,10 @@ module "backend_service" {
   db_secret_id              = "creative-studio-db-password"
 
   # networking - needed to reach Cloud SQL's private IP
-  vpc_network_id    = google_compute_network.vpc.self_link
-  vpc_subnetwork_id = google_compute_subnetwork.vpc_subnet.self_link
+  # Cloud Run's vpc_access.network_interfaces expects the short resource
+  # name (projects/*/global/networks/*), not the compute API self_link URL.
+  vpc_network_id    = "projects/${var.gcp_project_id}/global/networks/${google_compute_network.vpc.name}"
+  vpc_subnetwork_id = "projects/${var.gcp_project_id}/regions/${var.gcp_region}/subnetworks/${google_compute_subnetwork.vpc_subnet.name}"
 }
 
 resource "google_firebase_project" "default" {
